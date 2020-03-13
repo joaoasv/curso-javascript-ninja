@@ -77,13 +77,8 @@ function book(name) {
             lib: 'Smart Digital'
         }
     }
-
-    if(!name) {
-        return books;
-    }
-
-    return books[name];
-
+    
+    return !name ? books : books[name];
 }
 
 /*
