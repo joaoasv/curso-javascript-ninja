@@ -91,7 +91,7 @@
     */
     console.log( '\nPROPRIEDADE: VALOR' );
     
-    for(var i = 0; i < Object.keys(books).length; i++) {
+    for(var i = 0; i < books.length; i++) {
         for(prop in books[i]) {
             console.log(`${prop} : ${books[i][prop]}`);
         }
