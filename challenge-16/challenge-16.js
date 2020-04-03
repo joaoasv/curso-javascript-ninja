@@ -104,7 +104,6 @@
     for(var i = 0, len = myName.length; i < len; i++) {
         newName.push(i % 2 === 0 ? myName[i].toUpperCase() : myName[i].toLowerCase());
     }
-    
     console.log(newName.join(''));
     
 })();
