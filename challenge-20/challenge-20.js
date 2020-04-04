@@ -136,8 +136,6 @@
 
     function isValidEmail(email) {
         const pattern = /^[\w+.]+@\w+\.\w{2,}(?:\.\w{2})?$/;
-        if(!pattern.test(email))        
-            return false;
-        return email;
+        return pattern.test(email);
     }
 })(window, document);
