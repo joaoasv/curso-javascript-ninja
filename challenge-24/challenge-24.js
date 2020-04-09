@@ -1,75 +1,80 @@
-/*
-Nossa calculadora agora está funcional! A ideia desse desafio é modularizar
-o código, conforme vimos na aula anterior. Quebrar as responsabilidades
-em funções, onde cada função faça somente uma única coisa, e faça bem feito.
+(function(window, document) {
+    'use strict';
+    /*
+    Nossa calculadora agora está funcional! A ideia desse desafio é modularizar
+    o código, conforme vimos na aula anterior. Quebrar as responsabilidades
+    em funções, onde cada função faça somente uma única coisa, e faça bem feito.
 
-- Remova as duplicações de código;
-- agrupe os códigos que estão soltos em funções (declarações de variáveis,
-listeners de eventos, etc);
-- faça refactories para melhorar esse código, mas de forma que o mantenha com a
-mesma funcionalidade.
-*/
+    - Remova as duplicações de código;
+    - agrupe os códigos que estão soltos em funções (declarações de variáveis,
+    listeners de eventos, etc);
+    - faça refactories para melhorar esse código, mas de forma que o mantenha com a
+    mesma funcionalidade.
+    */
 
-var $visor = document.querySelector('[data-js="visor"]');
-var $buttonsNumbers = document.querySelectorAll('[data-js="button-number"]');
-var $buttonsOperations = document.querySelectorAll('[data-js="button-operation"]');
-var $buttonCE = document.querySelector('[data-js="button-ce"]');
-var $buttonEqual = document.querySelector('[data-js="button-equal"]');
+    const $visor = document.querySelector(`[data-js="result"]`);
+    const $operators = document.querySelectorAll(`[data-js="operators"]`);
+    const $numbers = document.querySelectorAll(`[data-js="number"]`);
+    const $reset = document.querySelector(`[data-js="reset"]`);
+    const $equal = document.querySelector(`[data-js="equal"]`);
+    const opRegEx = new RegExp(`([\\+\\-\\/\\*]+)([\\+\\-\\/\\*]+)$`, `g`);
+    const opRegExLast = new RegExp(`([\\+\\-\\/\\*])$`, `g`);
 
-Array.prototype.forEach.call($buttonsNumbers, function(button) {
-  button.addEventListener('click', handleClickNumber, false);
-});
-Array.prototype.forEach.call($buttonsOperations, function(button) {
-  button.addEventListener('click', handleClickOperation, false);
-});
-$buttonCE.addEventListener('click', handleClickCE, false);
-$buttonEqual.addEventListener('click', handleClickEqual, false);
+    function init() {
 
-function handleClickNumber() {
-  $visor.value += this.value;
-}
+        function initEvents() {
+            $equal.addEventListener('click', exec, false);
+            $reset.addEventListener('click', reset, false);
+            Array.prototype.map.call($numbers, (item) => {
+                item.addEventListener('click', getNumbers, false);
+            });
+            Array.prototype.map.call($operators, (item) => {
+                return item.addEventListener('click', getOperators, false);
+            });
+        }
 
-function handleClickOperation() {
-  $visor.value = removeLastItemIfItIsAnOperator($visor.value);
-  $visor.value += this.value;
-}
+        function getNumbers() {
+            $visor.value = $visor.value == 0 ? this.value : $visor.value += this.value;
+        }
 
-function handleClickCE() {
-  $visor.value = 0;
-}
+        function getOperators() {
+            $visor.value += this.value;
+            $visor.value = $visor.value.replace(opRegEx, '$2');
+        }
 
-function isLastItemAnOperation(number) {
-  var operations = ['+', '-', 'x', '÷'];
-  var lastItem = number.split('').pop();
-  return operations.some(function(operator) {
-    return operator === lastItem;
-  });
-}
+        function exec() {
+            const operation = $visor.value.match(opRegExLast) === null ? $visor.value : $visor.value = $visor.value.replace(opRegExLast, '');
+            $visor.value = operation.match(/\d+(?:[\\+\\/\\*\\-]+)?/g).reduce(resultValues);
+        }
 
-function removeLastItemIfItIsAnOperator(number) {
-  if(isLastItemAnOperation(number)) {
-    return number.slice(0, -1);
-  }
-  return number;
-}
+        function resultValues(initial, current) {
+            const operator = initial.split('').pop();
+            const lastOperator = opRegExLast.test(current) ? current.split('').pop() : '';
+            const firstValue = initial.slice(0, -1);
+            const lastValue = current.replace(opRegExLast, '');
+            return execOperation(operator, firstValue, lastValue) + lastOperator;
+        }
 
-function handleClickEqual() {
-  $visor.value = removeLastItemIfItIsAnOperator($visor.value);
-  var allValues = $visor.value.match(/\d+[+x÷-]?/g);
-  $visor.value = allValues.reduce(function(accumulated, actual) {
-    var firstValue = accumulated.slice(0, -1);
-    var operator = accumulated.split('').pop();
-    var lastValue = removeLastItemIfItIsAnOperator(actual);
-    var lastOperator = isLastItemAnOperation(actual) ? actual.split('').pop() : '';
-    switch(operator) {
-      case '+':
-        return ( Number(firstValue) + Number(lastValue) ) + lastOperator;
-      case '-':
-        return ( Number(firstValue) - Number(lastValue) ) + lastOperator;
-      case 'x':
-        return ( Number(firstValue) * Number(lastValue) ) + lastOperator;
-      case '÷':
-        return ( Number(firstValue) / Number(lastValue) ) + lastOperator;
+        function execOperation(operator, firstValue, lastValue) {
+            switch (operator) {
+                case '+':
+                    return Number(firstValue) + Number(lastValue);
+                case '-':
+                    return Number(firstValue) - Number(lastValue);
+                case '*':
+                    return Number(firstValue) * Number(lastValue);
+                case '/':
+                    return Number(firstValue) / Number(lastValue);
+            }
+        }
+
+        function reset() {
+            $visor.value = 0;
+        }
+
+        initEvents();
     }
-  });
-}
+
+    init();
+
+})(window, document);
